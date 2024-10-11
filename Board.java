@@ -1,14 +1,4 @@
-/*
- * You may assume that the constructor receives an n-by-n array containing
- * the n2 integers between 0 and n2 − 1, where 0 represents the blank square.
- * You may also assume that 2 ≤ n < 128.
- *
- * PERFORMANCE REQUIREMENTS -
- * Your implementation should support all Board methods in time proportional to n2 (or better) in the worst case.
- *
- * You may not call any library functions other those in java.lang, java.util, and algs4.jar.
- */
-
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Board {
@@ -80,12 +70,41 @@ public class Board {
     }
 
     public Iterable<Board> neighbors() {
+        int blankRow = 0, blankCol = 0;
+        boolean blankFound = false;
+        ArrayList<Board> neighbors = new ArrayList<Board>();
 
+        for (blankRow = 0; blankRow < BOARD_DIMENSION; blankRow++) {
+            for (blankCol = 0; blankCol < BOARD_DIMENSION; blankCol++)
+                if (BOARD[blankRow][blankCol] == 0) {
+                    blankFound = true;
+                    break;
+                }
+
+            if (blankFound) break;
+        }
+
+        if (blankRow > 0) neighbors.add(copyFromOriginalAndSwapTiles(blankRow, blankCol, blankRow - 1, blankCol));
+
+        if (blankCol > 0) neighbors.add(copyFromOriginalAndSwapTiles(blankRow, blankCol, blankRow, blankCol - 1));
+
+        if (blankCol < (BOARD_DIMENSION - 1)) neighbors.add(copyFromOriginalAndSwapTiles(blankRow, blankCol, blankRow, blankCol + 1));
+
+        if (blankRow < (BOARD_DIMENSION - 1)) neighbors.add(copyFromOriginalAndSwapTiles(blankRow, blankCol, blankRow + 1, blankCol));
+
+        return neighbors;
     }
 
-    // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
+        int swappingRow, swappingCol, twinRow, twinCol;
+        swappingRow = swappingCol = 0;
+        twinCol = twinRow = BOARD_DIMENSION - 1;
 
+        if (BOARD[swappingRow][swappingCol] == 0) swappingCol++;
+
+        if (BOARD[twinRow][twinCol] == 0) twinCol--;
+
+        return copyFromOriginalAndSwapTiles(swappingRow, swappingCol, twinRow, twinCol);
     }
 
     private int[][] copyBoardContent(int[][] original) {
@@ -109,5 +128,14 @@ public class Board {
         int correctCol = (boardElement - 1) % BOARD_DIMENSION;
 
         return Math.abs(row - correctRow) + Math.abs(col - correctCol);
+    }
+
+    private Board copyFromOriginalAndSwapTiles(int originalRow, int originalCol, int newRow, int newCol) {
+        int[][] boardCopy = copyBoardContent(BOARD);
+
+        boardCopy[originalRow][originalCol] = BOARD[newRow][newCol];
+        boardCopy[newRow][newCol] = BOARD[originalRow][originalCol];
+
+        return new Board(boardCopy);
     }
 }
